@@ -2,5 +2,6 @@
 {
     public class DealerEditPhoneDTO
     {
+        public string PhoneNumber { get; set; }
     }
 }

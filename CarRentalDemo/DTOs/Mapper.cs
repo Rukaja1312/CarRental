@@ -1,17 +1,21 @@
-﻿using AutoMapper;
-using CarRentalDemo.Models;
-
-namespace CarRentalDemo.DTOs
+﻿namespace CarRentalDemo.DTOs
 {
+    using AutoMapper;
+    using CarRentalDemo.Models;
+    using System.Collections.Generic;
+
     public class Mapper : Profile
     {
         public Mapper()
         {
-            CreateMap<Car, CarCreateDTO>();
+           CreateMap<CarCreateDTO, Car>();
             CreateMap<Car, CarViewDTO>();
+            CreateMap<CarCreateOutOfIFormFileDTO, Car>();
+           CreateMap<CarCreateDTO, CarCreateOutOfIFormFileDTO>();
+            CreateMap<CarEditDTO, Car>();
             CreateMap<Car, CarEditDTO>();
-            CreateMap<Dealer, DealerEditPhoneDTO>();
-            CreateMap<Dealer, DealerCarsDTO>();
+            CreateMap<DealerCarsDTO, Car>();
+            CreateMap<DealerDTO, Dealer>();
         }
     }
 }

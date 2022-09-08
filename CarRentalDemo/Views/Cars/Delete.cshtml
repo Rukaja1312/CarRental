@@ -15,8 +15,8 @@
             @Html.DisplayNameFor(model => model.Brand)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Brand)
-        </dd>
+            @Html.DisplayFor(model => model.Brand.Name)
+        </dd class>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Model)
         </dt>
@@ -36,20 +36,17 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Images)
+            @Html.DisplayNameFor(model => model.Image)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Images)
+            @if(Model.Image!=null)
+            {
+           <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Image))" style="width:180px;height:180px;" />
+            }
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Dealer)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Dealer.Name)
-        </dd class>
     </dl>
     
-    <form asp-action="Delete">
+    <form asp-controller="Cars" method="post" asp-action="DeletePost">
         <input type="hidden" asp-for="Id" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>

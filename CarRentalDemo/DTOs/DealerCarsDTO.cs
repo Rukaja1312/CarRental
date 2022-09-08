@@ -1,13 +1,10 @@
-﻿using CarRentalDemo.Models;
-using System.Collections;
-using System.Collections.Generic;
-
-namespace CarRentalDemo.DTOs
+﻿namespace CarRentalDemo.DTOs
 {
+    using CarRentalDemo.Models;
+    using System.Collections.Generic;
+
     public class DealerCarsDTO
     {
-        public int Id { get; set; }
-
         public IEnumerable<Car> Cars { get; set; } 
     }
 }

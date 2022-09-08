@@ -1,16 +1,18 @@
 ﻿namespace CarRentalDemo.DTOs
 {
     using CarRentalDemo.Models;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using System;
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
 
     public class CarCreateDTO
-    {      
+    {
 
         [Required]
-        [MinLength(2)]
-        [MaxLength(30)]
-        public string Brand { get; set; }
+        public int BrandId { get; set; }
+
+        public SearchByBrand Brand { get; set; }
 
         [Required]
         [MinLength(2)]
@@ -26,11 +28,8 @@
         [MaxLength(500)]
         public string Description { get; set; }
 
-        public byte[] Images { get; set; }
+        [BindProperty]
+        public IFormFile Image { get; set; }
 
-        //[ForeignKey("Dealer")]
-        //public int DealerId { get; set; }
-        //
-        //public Dealer Dealer { get; set; }
     }
 }

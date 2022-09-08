@@ -1,21 +1,17 @@
-using CarRentalDemo.Data;
-using CarRentalDemo.Services;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace CarRentalDemo
 {
+    using CarRentalDemo.Data;
+    using CarRentalDemo.Services;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using System;
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -31,13 +27,34 @@ namespace CarRentalDemo
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddControllersWithViews(configure =>
+            {
+                configure.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+            });
+
+            //current User
+            services.AddHttpContextAccessor();
+
             services.AddMvc();
+
+            //AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             services.AddDatabaseDeveloperPageExceptionFilter();
+
+            //Services
             services.AddTransient<ICarService, CarService>();
+            services.AddTransient<IDealerService, DealerService>();
+            services.AddHttpContextAccessor();
+         
+
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddControllersWithViews();
+                       
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,13 +81,18 @@ namespace CarRentalDemo
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+              endpoints.MapControllerRoute(
+                  name: "default",
+                  pattern: "{controller=Home}/{action=Index}/{id?}");
+              
+              endpoints.MapControllerRoute(
+                  name: "default",
+                  pattern: "{controller=Cars}/{action=Index}/{id?}");
+                endpoints.MapRazorPages(); 
 
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Cars}/{action=Index}/{id?}");
+                  name: "default",
+                  pattern: "{controller=Dealrs}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
         }

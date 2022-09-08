@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace CarRentalDemo.Models
+﻿namespace CarRentalDemo.Models
 {
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+
     public class Dealer
     {
         [Key]
@@ -15,15 +13,10 @@ namespace CarRentalDemo.Models
         [MaxLength(30)]
         public string Name { get; set; }
 
-        [Required]
-        [StringLength(10)]
-        public string PhoneNumber { get; set; }
 
         [Required]
-        [ForeignKey("User")]
         public string UserId { get; set; }
-        public IdentityUser User { get; set; }
 
-        public IEnumerable<Car> Cars { get; set; }
+        public IEnumerable<Car> Cars { get; set; } = new List<Car>();
     }
 }

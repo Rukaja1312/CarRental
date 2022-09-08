@@ -2,17 +2,19 @@
 {
     using CarRentalDemo.DTOs;
     using CarRentalDemo.Models;
+    using Microsoft.AspNetCore.Mvc.Rendering;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
     public interface ICarService
     {
-        Task<IEnumerable<Car>> GetAllCars();
-
-        Car CarCreate(CarCreateDTO carCreateDTO);//string brand, string model, string description, byte[] image, int year, int dealerId);
-
-        void Delete(int id);
-
-        void Edit(int carId, string brand, string model, string description, string imageUrl, int yea);
+        Task<List<CarViewDTO>> GetAllCars();
+        Task<bool> CarCreate(CarCreateDTO carCreateDTO);
+        Task<bool> Delete(int id);
+        Task<Car> DeleteGet(int id);
+        Task<bool> Edit(int carId, CarEditDTO carEditDTO);
+        Task<CarEditDTO> Edit(int id);
+        Task<List<CarViewDTO>> SortByBrand(int? id);
+        SelectList BrandList();
     }
 }

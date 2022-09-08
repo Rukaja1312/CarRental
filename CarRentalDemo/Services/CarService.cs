@@ -1,57 +1,140 @@
-﻿using AutoMapper;
-using CarRentalDemo.Data;
-using CarRentalDemo.DTOs;
-using CarRentalDemo.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace CarRentalDemo.Services
+﻿namespace CarRentalDemo.Services
 {
+    using AutoMapper;
+    using CarRentalDemo.Data;
+    using CarRentalDemo.DTOs;
+    using CarRentalDemo.Models;
+    using Microsoft.EntityFrameworkCore;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Identity;
+    using System.Security.Claims;
+    using Microsoft.AspNetCore.Mvc.Rendering;
+    using System.IO;
+
     public class CarService : ICarService
     {
         private readonly ApplicationDbContext context;
         private readonly IMapper mapper;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly UserManager<IdentityUser> userManager;
 
-        public CarService(ApplicationDbContext context,IMapper mapper)
+        public CarService(
+            ApplicationDbContext context,
+            IMapper mapper,
+            IHttpContextAccessor httpContextAccessor,
+            UserManager<IdentityUser> userManager)
         {
             this.context = context;
             this.mapper = mapper;
+            this.httpContextAccessor = httpContextAccessor;
+            this.userManager = userManager;
         }
-        public Car CarCreate(CarCreateDTO  carCreateDTO)//string brand, string model, string description, byte[] image, int year, int dealerId)
+
+        public async Task<bool> CarCreate(CarCreateDTO carCreateDTO)
         {
+            byte[] image = null;
 
-            //CarCreateDTO car = new CarCreateDTO
-            //{
-            //    Brand = brand,
-            //    Model = model,
-            //    Description = description,
-            //    Images = image,
-            //    Year = year,
-            //    //DealerId = dealerId
-            //};
-            //context.Cars.Add(car);
-            //context.SaveChanges();
+            var carOutFile = mapper.Map<CarCreateOutOfIFormFileDTO>(carCreateDTO);
+            var car = mapper.Map<Car>(carOutFile);
 
-            Car car = this.mapper.Map<Car>(carCreateDTO);
+            if (carCreateDTO.Image != null)
+            {
+                using (MemoryStream mStream = new())
+                {
+                    carCreateDTO.Image.CopyTo(mStream);
+                    image = mStream.ToArray();
+                }
+                car.Image = image;
+            }
+
+            var userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var brand = await context.SearchByBrands.Where(x => x.Id == car.BrandId).FirstOrDefaultAsync();
+            var dealerId = await context.Dealers.Where(x => x.UserId == userId).Select(x => x.Id).FirstOrDefaultAsync();
+
+            car.DealerId = dealerId;
+            car.Brand = brand;
+
+            Dealer d = context.Dealers.Where(x => x.Id == dealerId).FirstOrDefault();
+
+            if (d == null)
+            {
+                return false;
+            }
+
+            await this.context.Cars.AddAsync(car);
+            await this.context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<Car> DeleteGet(int id)
+        {
+            var car = await context.Cars.FindAsync(id);
             return car;
         }
 
-        public void Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new System.NotImplementedException();
+            var userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            Car car = await context.Cars.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+            if (car == null)
+            {
+                return false;
+            }
+
+            context.Cars.Remove(car);
+            await context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task<IEnumerable<Car>> GetAllCars()
+        public async Task<List<CarViewDTO>> GetAllCars()
         {
-            var cars = await context.Cars.Include(x=>x.Brand).Include(x => x.Dealer).ToListAsync();
+            var allCar = await context.Cars.Include(x => x.Brand).ToListAsync();
+            var carView = mapper.Map<List<CarViewDTO>>(allCar);
+            return carView;
+        }
+
+        public async Task<bool> Edit(int carId, CarEditDTO carEditDTO)
+        {
+            var carData = await this.context.Cars.Where(x => x.Id == carId).FirstOrDefaultAsync();
+
+            if (carData == null)
+            {
+                return false;
+            }
+
+            Car car = mapper.Map<CarEditDTO, Car>(carEditDTO, carData);
+            context.Update(car);
+            await context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<CarEditDTO> Edit(int id)
+        {
+            var car = await this.context.Cars.FindAsync(id);
+
+            var carEdit = mapper.Map<CarEditDTO>(car);
+            return carEdit;
+        }
+
+        public async Task<List<CarViewDTO>> SortByBrand(int? id)
+        {
+            var sortedCar = await context.Cars.Include(x => x.Brand).Where(x => x.BrandId == id).ToListAsync();
+
+            var cars = mapper.Map<List<CarViewDTO>>(sortedCar);
+
             return cars;
         }
 
-        public void Edit(int carId, string brand, string model, string description, string imageUrl, int yea)
+        public SelectList BrandList()
         {
-            throw new System.NotImplementedException();
+            var list = context.SearchByBrands.OrderBy(x => x.Name);
+            return new SelectList(list, "Id", "Name");
         }
     }
 }

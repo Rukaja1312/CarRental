@@ -1,14 +1,24 @@
-﻿@model IEnumerable<CarRentalDemo.Models.Car>
+﻿@using CarRentalDemo.Data
+@using Microsoft.AspNetCore.Authorization
+@model IEnumerable<CarRentalDemo.DTOs.CarViewDTO>
+
+@inject IAuthorizationService AuthorizationService
+@inject ApplicationDbContext context
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "All Cars";
+
 }
 
-<h1>Index</h1>
+@{
+    var brand = context.SearchByBrands.ToList();
+}
+<h1>All Cars</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -25,41 +35,47 @@
                 @Html.DisplayNameFor(model => model.Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Images)
+                @Html.DisplayNameFor(model => model.Image)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Dealer)
-            </th>
+            @if (User.IsInRole("Admin"))
+            {
+                <th>
+                    Options
+                </th>
+            }
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Brand)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Model)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Year)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Images)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Dealer.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Brand.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Model)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Year)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @if (item.Image != null)
+                    {
+                        <img src="data:image/jpeg;base64,@(Convert.ToBase64String(item.Image))" style="width:180px;height:180px;" />
+                    }
+                </td>
+                @if (User.IsInRole("Admin"))
+                {
+                    <td>
+                        <a asp-controller="Cars" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-controller="Cars" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                }
+            </tr>
+        }
     </tbody>
 </table>

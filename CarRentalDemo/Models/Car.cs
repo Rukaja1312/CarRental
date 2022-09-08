@@ -1,7 +1,6 @@
 ﻿namespace CarRentalDemo.Models
 {
-    using Microsoft.AspNetCore.Http;
-    using System.Collections.Generic;
+    using Microsoft.AspNetCore.Mvc;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,9 +9,11 @@
         [Key]
         public int Id { get; set; }
 
-        [ForeignKey("BrandId")]
         public int BrandId { get; set; }
-        public Brand Brand { get; set; }
+        [Required]
+        [MinLength(2)]
+        [MaxLength(30)]
+        public SearchByBrand Brand { get; set; }
 
         [Required]
         [MinLength(2)]
@@ -28,11 +29,10 @@
         [MaxLength(500)]
         public string Description { get; set; }
 
-        public byte[] Images { get; set; }
+        [BindProperty]
+        public byte[] Image { get; set; }
 
         [ForeignKey("Dealer")]
         public int DealerId { get; set; }
-
-        public Dealer Dealer { get; set; }
     }
 }
